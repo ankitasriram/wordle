@@ -332,45 +332,36 @@ function handleKeyPress(key) {
  * - Handle win/lose conditions
  */
 function submitGuess() {
-    // Validate guess is complete
     if (!isGuessComplete()) {
         showMessage('Not enough letters');
         return;
     }
     
-    // Validate guess is a real word
     if (!WordleWords.isValidWord(currentGuess)) {
         showMessage('Not in word list');
         shakeRow(currentRow);
         return;
     }
     
-    // Check each letter and get results
     const results = [];
     for (let i = 0; i < WORD_LENGTH; i++) {
         const result = checkLetter(currentGuess[i], i, currentWord);
         results.push(result);
     }
     
-    // Update tile colors immediately
     for (let i = 0; i < WORD_LENGTH; i++) {
         const tile = getTile(currentRow, i);
         setTileState(tile, results[i]);
     }
     
-    // Update keyboard colors
     updateKeyboardColors(currentGuess, results);
     
-    // Check if guess was correct
     const isCorrect = currentGuess === currentWord;
     
-    // Process row reveal (for celebrations)
     processRowReveal(currentRow, results);
     
-    // Update game state
     updateGameState(isCorrect);
     
-    // Move to next row if game continues
     if (!gameOver) {
         currentRow++;
         currentGuess = '';
@@ -388,35 +379,29 @@ function submitGuess() {
  * - Handle duplicate letters correctly (this is the tricky part!)
  */
 function checkLetter(guessLetter, position, targetWord) {
-    // Convert inputs to uppercase for comparison
     guessLetter = guessLetter.toUpperCase();
     targetWord = targetWord.toUpperCase();
     
-    // Check if letter is in correct position
     if (targetWord[position] === guessLetter) {
         return 'correct';
     }
     
-    // For handling duplicates correctly, we need to check how many of this letter
-    // appear in the target word and how many we've already marked as correct
     let targetCount = 0;
     let correctCount = 0;
     
-    // Count how many times this letter appears in target
+
     for (let i = 0; i < targetWord.length; i++) {
         if (targetWord[i] === guessLetter) {
             targetCount++;
         }
     }
     
-    // Count how many times we've already marked this letter as correct in current guess
     for (let i = 0; i < currentGuess.length; i++) {
         if (currentGuess[i].toUpperCase() === guessLetter && targetWord[i] === guessLetter) {
             correctCount++;
         }
     }
     
-    // Count how many times this letter appears before current position in guess
     let presentCount = 0;
     for (let i = 0; i < position; i++) {
         if (currentGuess[i].toUpperCase() === guessLetter && targetWord[i] !== guessLetter) {
@@ -424,7 +409,6 @@ function checkLetter(guessLetter, position, targetWord) {
         }
     }
     
-    // If we still have room for this letter (haven't used up all instances)
     if (correctCount + presentCount < targetCount) {
         return 'present';
     }
